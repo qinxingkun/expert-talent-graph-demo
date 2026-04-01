@@ -731,18 +731,18 @@ document.addEventListener('DOMContentLoaded', () => {
         'paper-coop': {
             id: 'paper-coop',
             title: '科技专家论文合作关系',
-            desc: '亿级论文数据驱动的作者消歧与标准化合作网络构建。',
+            desc: '亿级论文数据驱动的作者消歧、合作网络构建与影响力分析系统。',
             docs: `
                 <div class="card">
                     <div class="card-title"><i class="fas fa-info-circle"></i> 功能描述</div>
-                    <p>通过 Apache DolphinScheduler 分布式调度框架从多源采集亿级论文数据，利用基于 BERT 的实体对齐模型将论文作者与学者唯一标识进行精准关联。系统采用规则引擎结合编辑距离算法清洗重复记录，规范化作者排序、通讯作者标识等字段格式，最终生成标准化的论文合作关系数据集，支撑深度的学科交叉与科研影响力分析。</p>
+                    <p>通过 Apache DolphinScheduler 分布式调度框架从多源采集亿级论文数据，利用基于 BERT 的实体对齐模型将论文作者与学者唯一标识进行精准关联。系统采用规则引擎结合编辑距离算法清洗重复记录，规范化作者排序、通讯作者标识等字段格式。基于消歧后的作者身份档案提取共同作者关联，利用 Neo4j 图数据库构建全球论文合作网络，并通过多维评估模型量化合作网络对学者影响力的贡献。</p>
                 </div>
                 <div class="card">
                     <div class="card-title"><i class="fas fa-layer-group"></i> 系统子功能模块</div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div class="sub-func-item"><strong>1. 亿级论文数据采集</strong><br>分布式调度框架采集，多源数据分片写入关系型数据库。</div>
-                        <div class="sub-func-item"><strong>2. 基于BERT的作者消歧</strong><br>语义模型关联作者与学者标识，解决同名异人与异名同人。</div>
-                        <div class="sub-func-item"><strong>3. 记录清洗与规范化</strong><br>规则引擎+编辑距离清洗重复项，规范化字段格式。</div>
+                        <div class="sub-func-item"><strong>1. 论文合作关系构建</strong><br>亿级论文数据整合、作者消歧精准校验、合作网络搭建。</div>
+                        <div class="sub-func-item"><strong>2. 合作数据量化统计</strong><br>合作论文数量统计、期刊会议级别分布、论文被引情况分析。</div>
+                        <div class="sub-func-item"><strong>3. 合作网络与影响力分析</strong><br>研究方向分析、核心团队识别、网络影响力评估。</div>
                     </div>
                 </div>
             `,
@@ -754,9 +754,21 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div class="form-group">
                                 <label>选择子功能模块</label>
                                 <select id="sub-func-selector" style="margin-bottom: 15px; border: 2px solid var(--secondary-color);">
-                                    <option value="paper-collect">1. 亿级论文数据采集</option>
-                                    <option value="author-disambiguation">2. 基于BERT的作者消歧</option>
-                                    <option value="data-normalization">3. 记录清洗与规范化</option>
+                                    <optgroup label="1. 论文合作关系构建">
+                                        <option value="paper-data-integration">1.1 亿级论文数据整合</option>
+                                        <option value="paper-author-disambiguation">1.2 作者消歧精准校验</option>
+                                        <option value="paper-network-build">1.3 论文合作关系网络搭建</option>
+                                    </optgroup>
+                                    <optgroup label="2. 合作数据量化统计">
+                                        <option value="paper-coop-count">2.1 合作论文数量统计</option>
+                                        <option value="paper-journal-distribution">2.2 期刊/会议级别分布统计</option>
+                                        <option value="paper-citation-stats">2.3 论文被引情况统计</option>
+                                    </optgroup>
+                                    <optgroup label="3. 合作网络与影响力分析">
+                                        <option value="paper-research-direction">3.1 合作研究方向分析</option>
+                                        <option value="paper-team-identify">3.2 核心合作团队识别</option>
+                                        <option value="paper-influence-eval">3.3 合作网络影响力评估</option>
+                                    </optgroup>
                                 </select>
                             </div>
                             <div id="test-form-container" class="test-form">
@@ -782,28 +794,77 @@ document.addEventListener('DOMContentLoaded', () => {
                 curl: "# 参见各子模块调用示例"
             },
             subFunctions: {
-                'paper-collect': {
-                    path: '/api/v1/paper/collect',
+                'paper-data-integration': {
+                    path: '/api/v1/paper/data-integration',
                     params: [
-                        { name: '采集源', label: '采集源选择', type: 'select', options: ['CNKI', 'WOS', 'Scopus', 'IEEE'], default: 'WOS', desc: '选择论文数据来源渠道' },
-                        { name: '采集规模', label: '分片采集规模', type: 'number', default: 1000000, desc: '单次任务处理的记录行数' },
-                        { name: '调度策略', label: '调度触发策略', type: 'select', options: ['定时触发', '手动即时', 'API触发'], default: 'API触发', desc: 'DolphinScheduler任务启动方式' }
+                        { name: '采集源', label: '数据源选择', type: 'select', options: ['CNKI', 'WOS', 'Scopus', 'IEEE', 'PubMed'], default: 'WOS', desc: '选择论文数据来源渠道' },
+                        { name: '采集规模', label: '采集规模', type: 'number', default: 100000000, desc: '单次任务处理的记录行数' },
+                        { name: '调度引擎', label: '调度引擎', type: 'select', options: ['Apache DolphinScheduler', 'Airflow'], default: 'Apache DolphinScheduler', desc: '分布式调度框架' }
                     ]
                 },
-                'author-disambiguation': {
+                'paper-author-disambiguation': {
                     path: '/api/v1/paper/author-disambiguation',
                     params: [
-                        { name: '作者姓名', label: '论文作者姓名', type: 'text', default: 'Li Wei', desc: '待消歧的论文作者原始文本' },
-                        { name: '论文标题', label: '论文标题', type: 'text', default: 'Deep Learning for Knowledge Graph', desc: '用于语义对齐的背景文本' },
-                        { name: '作者单位', label: '作者所属单位', type: 'text', default: 'Dept. of CS, THU', desc: '辅助消歧的关键单位字段' },
-                        { name: '消歧模型', label: 'BERT模型版本', type: 'select', options: ['BERT-Base-Author-v1', 'BERT-Large-Author-v2'], default: 'BERT-Large-Author-v2', desc: '高精度学者标识关联模型' }
+                        { name: '作者姓名', label: '论文作者姓名', type: 'text', default: 'Zhang Wei', desc: '待消歧的论文作者原始文本' },
+                        { name: '作者机构', label: '作者所属机构', type: 'text', default: '清华大学计算机系', desc: '辅助消歧的机构字段' },
+                        { name: '研究方向', label: '研究方向', type: 'text', default: '知识图谱', desc: '辅助消歧的研究方向字段' },
+                        { name: '消歧模型', label: 'BERT模型版本', type: 'select', options: ['BERT-Base-Disambig-v1', 'BERT-Large-Disambig-v2'], default: 'BERT-Large-Disambig-v2', desc: '实体消歧模型版本' }
                     ]
                 },
-                'data-normalization': {
-                    path: '/api/v1/paper/normalization',
+                'paper-network-build': {
+                    path: '/api/v1/paper/network-build',
                     params: [
-                        { name: '原始记录', label: '待清洗记录文本', type: 'text', default: 'Author: ZHANG San; Univ: Tsing Hua Univ.; Year: 2022', desc: '待标准化的原始JSON或文本' },
-                        { name: '清洗引擎', label: '清洗引擎配置', type: 'select', options: ['规则引擎', '编辑距离算法', '混合模式'], default: '混合模式', desc: '选择记录去重与规范化策略' }
+                        { name: '学者ID', label: '学者标识', type: 'text', default: 'SCH_THU_001', desc: '消歧后的学者唯一标识' },
+                        { name: '时间范围', label: '时间范围', type: 'text', default: '2010-2024', desc: '合作网络构建的时间区间' },
+                        { name: '图数据库', label: '图数据库', type: 'select', options: ['Neo4j', 'NebulaGraph'], default: 'Neo4j', desc: '存储合作网络的图数据库' }
+                    ]
+                },
+                'paper-coop-count': {
+                    path: '/api/v1/paper/coop-count',
+                    params: [
+                        { name: '学者A', label: '学者A标识', type: 'text', default: 'SCH_THU_001', desc: '第一位学者ID' },
+                        { name: '学者B', label: '学者B标识', type: 'text', default: 'SCH_PKU_002', desc: '第二位学者ID' },
+                        { name: '年份区间', label: '年份区间', type: 'text', default: '2015-2024', desc: '统计的年份范围' },
+                        { name: '语言', label: '论文语言', type: 'select', options: ['全部', '中文', '英文'], default: '全部', desc: '按语言筛选' }
+                    ]
+                },
+                'paper-journal-distribution': {
+                    path: '/api/v1/paper/journal-distribution',
+                    params: [
+                        { name: '学者ID', label: '学者标识', type: 'text', default: 'SCH_THU_001', desc: '待统计的学者ID' },
+                        { name: '分级标准', label: '期刊分级标准', type: 'select', options: ['CCF推荐', 'JCR分区', '中科院分区'], default: 'CCF推荐', desc: '期刊会议分级依据' }
+                    ]
+                },
+                'paper-citation-stats': {
+                    path: '/api/v1/paper/citation-stats',
+                    params: [
+                        { name: '学者A', label: '学者A标识', type: 'text', default: 'SCH_THU_001', desc: '第一位学者ID' },
+                        { name: '学者B', label: '学者B标识', type: 'text', default: 'SCH_PKU_002', desc: '第二位学者ID' },
+                        { name: '统计维度', label: '统计维度', type: 'select', options: ['总被引', '单篇最高', '平均被引', '时间趋势'], default: '总被引', desc: '被引统计维度' }
+                    ]
+                },
+                'paper-research-direction': {
+                    path: '/api/v1/paper/research-direction',
+                    params: [
+                        { name: '学者ID', label: '学者标识', type: 'text', default: 'SCH_THU_001', desc: '待分析的学者ID' },
+                        { name: '聚类算法', label: '聚类算法', type: 'select', options: ['K-Means', 'Louvain', 'DBSCAN'], default: 'Louvain', desc: '关键词聚类算法' },
+                        { name: '向量数据库', label: '向量数据库', type: 'select', options: ['Milvus', 'Faiss'], default: 'Milvus', desc: '关键词向量存储' }
+                    ]
+                },
+                'paper-team-identify': {
+                    path: '/api/v1/paper/team-identify',
+                    params: [
+                        { name: '合作网络', label: '网络范围', type: 'select', options: ['全球网络', '机构网络', '学科网络'], default: '全球网络', desc: '团队识别的网络范围' },
+                        { name: '合作频次阈值', label: '合作频次阈值', type: 'number', default: 5, desc: '筛选稳定团队的最小合作频次' },
+                        { name: '持续时间阈值', label: '持续时间阈值(年)', type: 'number', default: 3, desc: '筛选稳定团队的最小合作年限' }
+                    ]
+                },
+                'paper-influence-eval': {
+                    path: '/api/v1/paper/influence-eval',
+                    params: [
+                        { name: '学者ID', label: '学者标识', type: 'text', default: 'SCH_THU_001', desc: '待评估的学者ID' },
+                        { name: '评估模型', label: '评估模型', type: 'select', options: ['XGBoost', 'RandomForest', 'NeuralNetwork'], default: 'XGBoost', desc: '影响力评估模型' },
+                        { name: '可视化引擎', label: '可视化引擎', type: 'select', options: ['AntV G6', 'ECharts', 'D3.js'], default: 'AntV G6', desc: '合作网络可视化组件' }
                     ]
                 }
             }
@@ -2077,36 +2138,204 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             },
             // 科技专家论文合作关系
-            'paper-collect': {
+            'paper-data-integration': {
                 "code": 200,
-                "message": "【论文数据采集】任务已启动",
+                "message": "【亿级论文数据整合】完成",
                 "data": {
-                    "任务ID": "DS_JOB_PAPER_8821",
-                    "当前源": "WOS (Web of Science)",
-                    "采集状态": "分片执行中",
-                    "已写入MySQL": "125,400 条",
-                    "调度引擎": "Apache DolphinScheduler"
+                    "任务ID": "DS_JOB_PAPER_INT_001",
+                    "数据源": "WOS (Web of Science)",
+                    "采集规模": "100,000,000 条",
+                    "整合状态": "分片执行完成",
+                    "已写入MySQL": "98,756,432 条",
+                    "调度引擎": "Apache DolphinScheduler",
+                    "执行耗时": "4小时32分钟",
+                    "数据质量": { "完整率": "99.2%", "去重率": "3.8%", "有效记录": "95,012,876 条" }
                 }
             },
-            'author-disambiguation': {
+            'paper-author-disambiguation': {
                 "code": 200,
-                "message": "【作者消歧关联】识别成功",
+                "message": "【作者消歧精准校验】完成",
                 "data": {
                     "原始姓名": "Li Wei",
                     "关联学者": "李维 (ID: SCH_THU_092)",
                     "标准单位": "清华大学计算机科学与技术系",
                     "消歧置信度": 0.994,
-                    "模型版本": "BERT-Large-Author-v2"
+                    "模型版本": "BERT-Large-Author-v2",
+                    "消歧详情": {
+                        "候选实体数": 15,
+                        "特征匹配": { "单位匹配度": 0.98, "研究领域匹配度": 0.95, "合作者匹配度": 0.92 },
+                        "最终判定": "高置信度匹配"
+                    },
+                    "处理统计": { "总消歧数": "12,456,789", "高置信度": "11,234,567", "需人工复核": "1,222,222" }
                 }
             },
-            'paper-normalization': {
+            'paper-network-build': {
                 "code": 200,
-                "message": "【记录清洗规范化】完成",
+                "message": "【论文合作关系网络搭建】完成",
                 "data": {
-                    "清洗状态": "成功",
-                    "去重记录数": 12,
-                    "规范化字段": ["作者排序", "通讯作者标识", "中英文机构对齐"],
-                    "数据集版本": "STD_PAPER_2024_Q1"
+                    "网络ID": "NET_COOP_2024_Q1",
+                    "节点总数": "8,567,234 位学者",
+                    "边总数": "45,678,901 条合作关系",
+                    "图数据库": "Neo4j 5.x 集群",
+                    "网络特征": {
+                        "平均度": 10.67,
+                        "最大连通分量": "99.2%",
+                        "聚类系数": 0.34,
+                        "平均路径长度": 4.2
+                    },
+                    "存储详情": { "节点标签": "Scholar", "边类型": "COOPERATE", "属性索引": ["name", "institution", "research_field"] }
+                }
+            },
+            'paper-coop-count': {
+                "code": 200,
+                "message": "【合作论文数量统计】完成",
+                "data": {
+                    "统计ID": "STAT_COOP_CNT_001",
+                    "学者ID": "SCH_THU_092",
+                    "学者姓名": "李维",
+                    "合作论文总数": 156,
+                    "合作者数量": 42,
+                    "合作分布": {
+                        "独立作者": 23,
+                        "2人合作": 45,
+                        "3-5人合作": 67,
+                        "6人以上合作": 21
+                    },
+                    "Top合作者": [
+                        { "姓名": "王明", "单位": "北京大学", "合作论文数": 28 },
+                        { "姓名": "张华", "单位": "清华大学", "合作论文数": 22 },
+                        { "姓名": "刘洋", "单位": "中科院", "合作论文数": 18 }
+                    ],
+                    "年度趋势": { "2020": 12, "2021": 18, "2022": 25, "2023": 32, "2024": 28 }
+                }
+            },
+            'paper-journal-distribution': {
+                "code": 200,
+                "message": "【期刊/会议级别分布统计】完成",
+                "data": {
+                    "统计ID": "STAT_JRNL_DIST_001",
+                    "学者ID": "SCH_THU_092",
+                    "论文总数": 156,
+                    "期刊分布": {
+                        "SCI一区": 45,
+                        "SCI二区": 38,
+                        "SCI三区": 22,
+                        "SCI四区": 15,
+                        "EI": 28,
+                        "中文核心": 8
+                    },
+                    "顶级期刊": [
+                        { "期刊名": "Nature", "论文数": 3, "影响因子": 69.5 },
+                        { "期刊名": "Science", "论文数": 2, "影响因子": 56.9 },
+                        { "期刊名": "IEEE TPAMI", "论文数": 12, "影响因子": 24.3 }
+                    ],
+                    "顶级会议": [
+                        { "会议名": "CVPR", "论文数": 8, "CCF等级": "A" },
+                        { "会议名": "ICCV", "论文数": 6, "CCF等级": "A" },
+                        { "会议名": "NeurIPS", "论文数": 5, "CCF等级": "A" }
+                    ],
+                    "平均影响因子": 8.76
+                }
+            },
+            'paper-citation-stats': {
+                "code": 200,
+                "message": "【论文被引情况统计】完成",
+                "data": {
+                    "统计ID": "STAT_CITE_001",
+                    "学者ID": "SCH_THU_092",
+                    "总被引次数": 8567,
+                    "h指数": 32,
+                    "i10指数": 58,
+                    "被引分布": {
+                        "0次被引": 12,
+                        "1-10次": 45,
+                        "11-50次": 67,
+                        "51-100次": 23,
+                        "100次以上": 9
+                    },
+                    "高被引论文": [
+                        { "标题": "Deep Learning for Image Recognition", "被引": 856, "年份": 2020 },
+                        { "标题": "Transformer-based Object Detection", "被引": 623, "年份": 2021 },
+                        { "标题": "Self-supervised Visual Representation", "被引": 445, "年份": 2022 }
+                    ],
+                    "被引趋势": { "2020": 856, "2021": 1234, "2022": 1876, "2023": 2456, "2024": 2145 }
+                }
+            },
+            'paper-research-direction': {
+                "code": 200,
+                "message": "【合作研究方向分析】完成",
+                "data": {
+                    "分析ID": "ANL_DIR_001",
+                    "学者ID": "SCH_THU_092",
+                    "主要研究方向": [
+                        { "方向": "计算机视觉", "论文占比": "45%", "合作者数": 28 },
+                        { "方向": "深度学习", "论文占比": "32%", "合作者数": 22 },
+                        { "方向": "自然语言处理", "论文占比": "15%", "合作者数": 12 },
+                        { "方向": "强化学习", "论文占比": "8%", "合作者数": 8 }
+                    ],
+                    "关键词聚类": {
+                        "算法": "Neo4j图算法",
+                        "向量库": "Milvus",
+                        "聚类数": 156,
+                        "Top关键词": ["目标检测", "图像分割", "特征提取", "神经网络", "注意力机制"]
+                    },
+                    "跨学科合作": [
+                        { "学科": "生物医学", "论文数": 8, "合作机构": "北京协和医院" },
+                        { "学科": "自动驾驶", "论文数": 6, "合作机构": "百度Apollo" }
+                    ]
+                }
+            },
+            'paper-team-identify': {
+                "code": 200,
+                "message": "【核心合作团队识别】完成",
+                "data": {
+                    "识别ID": "ID_TEAM_001",
+                    "学者ID": "SCH_THU_092",
+                    "识别算法": "Louvain社区发现",
+                    "团队总数": 5,
+                    "核心团队": [
+                        {
+                            "团队ID": "TEAM_001",
+                            "团队规模": 12,
+                            "核心成员": ["李维", "王明", "张华", "刘洋"],
+                            "合作紧密度": 0.89,
+                            "主要研究方向": "计算机视觉",
+                            "代表论文": 28
+                        },
+                        {
+                            "团队ID": "TEAM_002",
+                            "团队规模": 8,
+                            "核心成员": ["李维", "陈强", "赵敏"],
+                            "合作紧密度": 0.76,
+                            "主要研究方向": "深度学习",
+                            "代表论文": 15
+                        }
+                    ],
+                    "团队演化": { "新增成员": 5, "退出成员": 2, "稳定周期": "3年+" }
+                }
+            },
+            'paper-influence-eval': {
+                "code": 200,
+                "message": "【合作网络影响力评估】完成",
+                "data": {
+                    "评估ID": "EVAL_INF_001",
+                    "学者ID": "SCH_THU_092",
+                    "评估模型": "XGBoost影响力模型",
+                    "综合影响力得分": 87.6,
+                    "影响力维度": {
+                        "学术产出": { "得分": 92, "权重": 0.3, "详情": "论文数量与质量" },
+                        "合作广度": { "得分": 85, "权重": 0.25, "详情": "合作者数量与多样性" },
+                        "合作深度": { "得分": 88, "权重": 0.25, "详情": "长期稳定合作关系" },
+                        "网络中心性": { "得分": 82, "权重": 0.2, "详情": "在合作网络中的核心程度" }
+                    },
+                    "网络中心性指标": {
+                        "度中心性": 0.045,
+                        "介数中心性": 0.032,
+                        "接近中心性": 0.067,
+                        "PageRank": 0.0012
+                    },
+                    "影响力排名": { "全球": "Top 5%", "国内": "Top 2%", "领域": "Top 3%" },
+                    "可视化引擎": "AntV G6"
                 }
             },
             // 重点关注科技企业关系

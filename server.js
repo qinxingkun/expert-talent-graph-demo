@@ -678,13 +678,16 @@ app.post('/api/v1/alumni/visual-adapt', (req, res) => {
 });
 
 // --- 科技专家论文合作关系 (子功能接口) ---
-app.post('/api/v1/paper/collect', (req, res) => {
+app.post('/api/v1/paper/data-integration', (req, res) => {
     res.json({
         code: 200,
-        message: "【论文数据采集】任务已启动 (硬编码响应)",
+        message: "【亿级论文数据整合】完成 (硬编码响应)",
         data: {
-            task_id: "DS_JOB_PAPER_8821",
+            task_id: "DS_JOB_PAPER_INT_001",
             source: req.body.采集源 || "WOS",
+            scale: req.body.采集规模 || 100000000,
+            scheduler: req.body.调度引擎 || "Apache DolphinScheduler",
+            integrated_records: 98756432,
             status: "success"
         }
     });
@@ -693,22 +696,133 @@ app.post('/api/v1/paper/collect', (req, res) => {
 app.post('/api/v1/paper/author-disambiguation', (req, res) => {
     res.json({
         code: 200,
-        message: "【作者消歧关联】识别成功 (硬编码响应)",
+        message: "【作者消歧精准校验】完成 (硬编码响应)",
         data: {
+            original_name: req.body.原始姓名 || "Li Wei",
             scholar_id: "SCH_THU_092",
             standard_name: "李维",
-            confidence: 0.994
+            institution: req.body.标准单位 || "清华大学计算机科学与技术系",
+            confidence: 0.994,
+            model_version: "BERT-Large-Author-v2"
         }
     });
 });
 
-app.post('/api/v1/paper/normalization', (req, res) => {
+app.post('/api/v1/paper/network-build', (req, res) => {
     res.json({
         code: 200,
-        message: "【记录清洗规范化】完成 (硬编码响应)",
+        message: "【论文合作关系网络搭建】完成 (硬编码响应)",
         data: {
-            deduplicated: 12,
-            dataset: "STD_PAPER_2024_Q1"
+            network_id: "NET_COOP_2024_Q1",
+            node_count: 8567234,
+            edge_count: 45678901,
+            graph_db: "Neo4j 5.x 集群",
+            status: "success"
+        }
+    });
+});
+
+app.post('/api/v1/paper/coop-count', (req, res) => {
+    res.json({
+        code: 200,
+        message: "【合作论文数量统计】完成 (硬编码响应)",
+        data: {
+            scholar_id: req.body.学者ID || "SCH_THU_092",
+            total_papers: 156,
+            collaborators: 42,
+            top_collaborators: [
+                { name: "王明", institution: "北京大学", papers: 28 },
+                { name: "张华", institution: "清华大学", papers: 22 },
+                { name: "刘洋", institution: "中科院", papers: 18 }
+            ]
+        }
+    });
+});
+
+app.post('/api/v1/paper/journal-distribution', (req, res) => {
+    res.json({
+        code: 200,
+        message: "【期刊/会议级别分布统计】完成 (硬编码响应)",
+        data: {
+            scholar_id: req.body.学者ID || "SCH_THU_092",
+            total_papers: 156,
+            distribution: {
+                "SCI一区": 45,
+                "SCI二区": 38,
+                "SCI三区": 22,
+                "SCI四区": 15,
+                "EI": 28,
+                "中文核心": 8
+            },
+            avg_impact_factor: 8.76
+        }
+    });
+});
+
+app.post('/api/v1/paper/citation-stats', (req, res) => {
+    res.json({
+        code: 200,
+        message: "【论文被引情况统计】完成 (硬编码响应)",
+        data: {
+            scholar_id: req.body.学者ID || "SCH_THU_092",
+            total_citations: 8567,
+            h_index: 32,
+            i10_index: 58,
+            highly_cited: [
+                { title: "Deep Learning for Image Recognition", citations: 856, year: 2020 },
+                { title: "Transformer-based Object Detection", citations: 623, year: 2021 }
+            ]
+        }
+    });
+});
+
+app.post('/api/v1/paper/research-direction', (req, res) => {
+    res.json({
+        code: 200,
+        message: "【合作研究方向分析】完成 (硬编码响应)",
+        data: {
+            scholar_id: req.body.学者ID || "SCH_THU_092",
+            directions: [
+                { name: "计算机视觉", ratio: "45%", collaborators: 28 },
+                { name: "深度学习", ratio: "32%", collaborators: 22 },
+                { name: "自然语言处理", ratio: "15%", collaborators: 12 }
+            ],
+            top_keywords: ["目标检测", "图像分割", "特征提取", "神经网络", "注意力机制"]
+        }
+    });
+});
+
+app.post('/api/v1/paper/team-identify', (req, res) => {
+    res.json({
+        code: 200,
+        message: "【核心合作团队识别】完成 (硬编码响应)",
+        data: {
+            scholar_id: req.body.学者ID || "SCH_THU_092",
+            algorithm: "Louvain社区发现",
+            team_count: 5,
+            core_teams: [
+                { id: "TEAM_001", size: 12, core_members: ["李维", "王明", "张华", "刘洋"], tightness: 0.89 },
+                { id: "TEAM_002", size: 8, core_members: ["李维", "陈强", "赵敏"], tightness: 0.76 }
+            ]
+        }
+    });
+});
+
+app.post('/api/v1/paper/influence-eval', (req, res) => {
+    res.json({
+        code: 200,
+        message: "【合作网络影响力评估】完成 (硬编码响应)",
+        data: {
+            scholar_id: req.body.学者ID || "SCH_THU_092",
+            model: "XGBoost影响力模型",
+            overall_score: 87.6,
+            dimensions: {
+                academic_output: 92,
+                collaboration_breadth: 85,
+                collaboration_depth: 88,
+                network_centrality: 82
+            },
+            ranking: { global: "Top 5%", domestic: "Top 2%", field: "Top 3%" }
         }
     });
 });
