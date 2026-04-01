@@ -72,12 +72,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <pre><code>import requests
 
-url = "http://api.kg-engine.com/v1/expert/direct-relation"
+url = "http://localhost:3001/api/v1/expert/direct-relation"
 payload = {
-    "experts": ["张三", "李四"],
-    "relation_types": ["paper", "project"]
+    "expert_name": "张三",
+    "target_domain": "人工智能"
 }
-headers = {"Authorization": "Bearer YOUR_TOKEN"}
+headers = {"Content-Type": "application/json"}
 
 response = requests.post(url, json=payload, headers=headers)
 print(response.json())</code></pre>
@@ -174,29 +174,27 @@ print(response.json())</code></pre>
         const runTestBtn = document.getElementById('run-test');
         const openConfigBtn = document.getElementById('open-config-btn');
         const testResult = document.getElementById('test-result');
+        const testInput = document.getElementById('test-input');
 
         if (runTestBtn) {
-            runTestBtn.addEventListener('click', () => {
-                testResult.innerHTML = '<span style="color: #60a5fa;">正在调用算法引擎...</span>';
-                setTimeout(() => {
-                    const mockResult = {
-                        code: 200,
-                        message: "success",
-                        data: {
-                            expert: "张三",
-                            relations: [
-                                { name: "李四", type: "论文合作", score: 0.98, institution: "清华大学" },
-                                { name: "王五", type: "专利共有人", score: 0.85, institution: "北京大学" },
-                                { name: "赵六", type: "项目组成员", score: 0.92, institution: "中国科学院" }
-                            ],
-                            meta: {
-                                model: "RoBERTa-MultiClass-v1.5",
-                                processing_time: "142ms"
-                            }
-                        }
-                    };
-                    testResult.innerHTML = JSON.stringify(mockResult, null, 2);
-                }, 800);
+            runTestBtn.addEventListener('click', async () => {
+                testResult.innerHTML = '<span style="color: #60a5fa;">正在调用 Node.js 算法引擎...</span>';
+                
+                try {
+                    const inputData = JSON.parse(testInput.value);
+                    const response = await fetch('/api/v1/expert/direct-relation', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(inputData)
+                    });
+                    
+                    const result = await response.json();
+                    testResult.innerHTML = JSON.stringify(result, null, 2);
+                } catch (error) {
+                    testResult.innerHTML = `<span style="color: #ef4444;">请求失败: ${error.message}</span>`;
+                }
             });
         }
 

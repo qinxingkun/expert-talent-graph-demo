@@ -20,5 +20,19 @@
 
 ## 运行环境
 
-- 无需后端服务，直接打开 `index.html` 即可运行。
-- 使用 Font Awesome 提供图标支持（需要联网）。
+### 启动 Node.js 服务
+
+1. 安装依赖：
+```bash
+npm install
+```
+
+2. 启动服务：
+```bash
+npm start
+```
+服务将在 `http://localhost:3001` 启动。
+
+### 访问页面
+
+在浏览器中打开 `http://localhost:3001` 即可访问原型页面并进行在线测试。
